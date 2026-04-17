@@ -10,7 +10,7 @@
       "use": "@vercel/static"
     },
     {
-      "src": "*.js",
+      "src": "*.client.js",
       "use": "@vercel/static"
     },
     {
