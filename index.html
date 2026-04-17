@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrainLog Web</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <p class="eyebrow">Workout Management Platform</p>
+        <h1>TrainLog</h1>
+        <p class="hero-copy">Programini yukle, hareketlerini set set gir, tek ekranda tum seansi tamamla.</p>
+      </div>
+      <div class="hero-panel">
+        <span class="hero-label">Bugun</span>
+        <strong id="todayLabel"></strong>
+        <p id="heroSummary">Henuz kayit yok. Ilk seansini olusturarak basla.</p>
+        <div class="hero-user-row">
+          <span id="currentUserEmail"></span>
+          <button id="logoutButton" class="secondary-button small-button" type="button">Cikis Yap</button>
+        </div>
+      </div>
+    </header>
+
+    <nav class="main-nav">
+      <button class="nav-link active" data-view="dashboard">Genel Bakis</button>
+      <button class="nav-link" data-view="workouts">Seans Gir</button>
+      <button class="nav-link" data-view="programs">Programlar</button>
+      <button class="nav-link" data-view="exercises">Hareketler</button>
+      <button class="nav-link" data-view="history">Gecmis</button>
+    </nav>
+
+    <main class="content-grid">
+      <section class="view active" data-view="dashboard">
+        <div class="card-grid stats-grid">
+          <article class="stat-card accent-card">
+            <span>Toplam Seans</span>
+            <strong id="statWorkoutCount">0</strong>
+            <p>Kaydedilen tum antrenmanlar</p>
+          </article>
+          <article class="stat-card">
+            <span>Program Sayisi</span>
+            <strong id="statProgramCount">0</strong>
+            <p>Aktif program sablonlari</p>
+          </article>
+          <article class="stat-card">
+            <span>Hareket Sayisi</span>
+            <strong id="statExerciseCount">0</strong>
+            <p>Kutuphanedeki hareketler</p>
+          </article>
+          <article class="stat-card">
+            <span>Bu Hafta</span>
+            <strong id="statWeeklyCount">0</strong>
+            <p>Son 7 gundeki seanslar</p>
+          </article>
+        </div>
+
+        <div class="card-grid dashboard-grid">
+          <article class="panel-card">
+            <div class="section-top">
+              <div>
+                <p class="section-label">Hizli Baslangic</p>
+                <h2>Yeni seansi ac</h2>
+              </div>
+            </div>
+            <p class="muted-copy">Programdan yukleyip sadece tekrar, agirlik ve RIR girerek hizli sekilde antrenman tutabilirsin.</p>
+            <div class="action-row">
+              <button class="primary-button" data-shortcut="workouts">Seans Gir</button>
+              <button class="secondary-button" data-shortcut="programs">Program Ekle</button>
+            </div>
+          </article>
+
+          <article class="panel-card">
+            <div class="section-top">
+              <div>
+                <p class="section-label">Son Seanslar</p>
+                <h2>Yakindaki kayitlar</h2>
+              </div>
+            </div>
+            <div id="dashboardHistory" class="stack-list"></div>
+          </article>
+
+          <article class="panel-card">
+            <div class="section-top">
+              <div>
+                <p class="section-label">Program Ozeti</p>
+                <h2>Yuklenebilir planlar</h2>
+              </div>
+            </div>
+            <div id="dashboardPrograms" class="stack-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" data-view="workouts">
+        <div class="session-layout">
+          <div class="panel-card session-main">
+            <div class="section-top">
+              <div>
+                <p class="section-label">Seans Girisi</p>
+                <h2>Set bazli antrenman gir</h2>
+              </div>
+            </div>
+
+            <div class="session-meta-grid">
+              <label>
+                Seans
+                <input type="text" id="sessionName" placeholder="Push Day / Ust Vucut">
+              </label>
+              <label>
+                Tarih
+                <input type="date" id="sessionDate">
+              </label>
+              <label>
+                Toplam Sure (dk)
+                <input type="number" id="sessionDuration" min="0" placeholder="75">
+              </label>
+            </div>
+
+            <div class="session-toolbar">
+              <label class="toolbar-field">
+                Programdan yukle
+                <select id="sessionProgramSelect"></select>
+              </label>
+              <button class="secondary-button" id="loadProgramButton" type="button">Programi Yukle</button>
+              <button class="primary-button" id="addExerciseButton" type="button">Hareket Ekle</button>
+            </div>
+
+            <div class="import-panel">
+              <div class="section-top compact-top">
+                <div>
+                  <p class="section-label">Iceri Aktar</p>
+                  <h3>Excel tablosundan seans olustur</h3>
+                </div>
+              </div>
+              <div class="import-actions">
+                <label class="secondary-button file-button" for="sessionImportFile">CSV Yukle</label>
+                <input id="sessionImportFile" type="file" accept=".csv,text/csv" hidden>
+                <button class="secondary-button" id="importPastedTableButton" type="button">Yapistirilan Tabloyu Yukle</button>
+              </div>
+              <label class="full-span">
+                Excel'den kopyala yapistir
+                <textarea id="sessionImportTextarea" rows="5" placeholder="Date\tWorkout\tSet\tWeight\tRep\tRIR&#10;31.03.2026\tSmith Machine Incline Bench Press\t1\t60\t5\t1"></textarea>
+              </label>
+              <div id="importPreviewPanel" class="import-preview-panel" hidden>
+                <div class="section-top compact-top">
+                  <div>
+                    <p class="section-label">Import Onizleme</p>
+                    <h3 id="importPreviewTitle">Seans onizlemesi</h3>
+                  </div>
+                </div>
+                <div id="importPreviewList" class="stack-list"></div>
+                <div class="import-actions">
+                  <button class="secondary-button" id="cancelImportButton" type="button">Iptal</button>
+                  <button class="primary-button" id="confirmImportButton" type="button">Onayla ve Kaydet</button>
+                </div>
+              </div>
+            </div>
+
+            <datalist id="exerciseSuggestions"></datalist>
+
+            <div id="sessionExercises" class="session-exercise-list"></div>
+
+            <div class="session-footer-actions">
+              <button class="secondary-button save-session-button" id="saveDraftButton" type="button">Hepsini Kaydet</button>
+              <button class="primary-button save-session-button" id="saveSessionButton" type="button">Seansi Bitir</button>
+            </div>
+          </div>
+
+          <aside class="panel-card inspector-card">
+            <div class="section-top">
+              <div>
+                <p class="section-label">Son Calistigin Hareket</p>
+                <input id="inspectorExerciseInput" list="exerciseSuggestions" class="inspector-exercise-input" type="text" placeholder="Hareket sec veya degistir">
+              </div>
+            </div>
+            <div class="inspector-nav">
+              <button class="secondary-button small-button" id="inspectorPrevButton" type="button">Onceki</button>
+              <span id="inspectorPositionLabel" class="inspector-position">Kayit yok</span>
+              <button class="secondary-button small-button" id="inspectorNextButton" type="button">Sonraki</button>
+            </div>
+            <div id="inspectorContent" class="inspector-content">
+              <div class="empty-state">Bir hareket secildiginde burada son seanstaki setleri goreceksin.</div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" data-view="programs">
+        <div class="panel-card">
+          <div class="section-top">
+            <div>
+              <p class="section-label">Program Yonetimi</p>
+              <h2>Program olustur</h2>
+            </div>
+          </div>
+          <form id="programForm" class="program-builder">
+            <div class="form-grid">
+              <label>
+                Program Basligi
+                <input type="text" id="programTitleInput" placeholder="3 Gunluk Hacim Programi" required>
+              </label>
+              <label>
+                Genel Hedef
+                <input type="text" id="programGoalInput" placeholder="Hipertrofi / Kuvvet / Performans">
+              </label>
+              <label class="full-span">
+                Notlar
+                <textarea id="programNotesInput" rows="3" placeholder="Programin genel mantigi veya ilerleme notu"></textarea>
+              </label>
+            </div>
+
+            <div id="programDays" class="program-days"></div>
+
+            <div class="program-builder-actions">
+              <button class="secondary-button" id="addProgramDayButton" type="button">Gun Ekle</button>
+              <button class="primary-button" type="submit">Programi Kaydet</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel-card">
+          <div class="section-top">
+            <div>
+              <p class="section-label">Program Listesi</p>
+              <h2>Mevcut planlar</h2>
+            </div>
+          </div>
+          <div id="programList" class="stack-list"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view="exercises">
+        <div class="panel-card">
+          <div class="section-top">
+            <div>
+              <p class="section-label">Hareket Kutuphanesi</p>
+              <h2>Hareket ekle</h2>
+            </div>
+          </div>
+          <form id="exerciseForm" class="form-grid">
+            <label>
+              Hareket Adi
+              <input type="text" name="name" placeholder="Bench Press" required>
+            </label>
+            <label>
+              Kas Grubu
+              <input type="text" name="muscleGroup" placeholder="Gogus" required>
+            </label>
+            <label>
+              Ekipman
+              <input type="text" name="equipment" placeholder="Barbell">
+            </label>
+            <label class="full-span">
+              Aciklama
+              <textarea name="instructions" rows="3" placeholder="Kisa teknik not veya uygulama ipucu"></textarea>
+            </label>
+            <button class="primary-button full-span" type="submit">Hareketi Kaydet</button>
+          </form>
+        </div>
+        <div class="panel-card">
+          <div class="section-top">
+            <div>
+              <p class="section-label">Kutuphane</p>
+              <h2>Tum hareketler</h2>
+            </div>
+          </div>
+          <div id="exerciseList" class="exercise-grid"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view="history">
+        <div class="panel-card">
+          <div class="section-top">
+            <div>
+              <p class="section-label">Antrenman Gecmisi</p>
+              <h2>Tum seanslar</h2>
+            </div>
+          </div>
+          <div id="historyList" class="stack-list"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

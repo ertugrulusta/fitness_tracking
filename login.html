@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrainLog Giris</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="auth-page-shell">
+    <div class="auth-card auth-card-page">
+      <p class="eyebrow">TrainLog Account</p>
+      <h1 class="auth-page-title">Giris Yap</h1>
+      <p id="authSubtitle" class="muted-copy">Mevcut verilerini hesabina baglamak icin giris yap veya kayit ol.</p>
+      <form id="authForm" class="auth-form">
+        <label>
+          Email
+          <input id="authEmail" type="email" autocomplete="email" required>
+        </label>
+        <label>
+          Sifre
+          <input id="authPassword" type="password" autocomplete="current-password" required>
+        </label>
+        <button id="authSubmitButton" class="primary-button" type="submit">Giris Yap</button>
+      </form>
+      <p id="authMessage" class="auth-message"></p>
+      <button id="authToggleButton" class="secondary-button" type="button">Hesabin yok mu? Kayit ol</button>
+    </div>
+  </div>
+
+  <script src="login.js"></script>
+</body>
+</html>
