@@ -2,15 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
     "index.js": {
-      "includeFiles": [
-        "index.html",
-        "login.html",
-        "styles.css",
-        "app.client.js",
-        "login.client.js",
-        "api/**/*.js",
-        "lib/**/*.js"
-      ]
+      "includeFiles": "{index.html,login.html,styles.css,app.client.js,login.client.js,api/**/*.js,lib/**/*.js}"
     }
   }
 }
