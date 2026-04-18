@@ -39,7 +39,8 @@ async function submitAuthForm(event) {
 
     const payload = await response.json();
     if (!response.ok) {
-      authMessage.textContent = payload.error || "Giris yapilamadi.";
+      const detail = payload.detail ? ` (${payload.detail})` : "";
+      authMessage.textContent = (payload.error || "Giris yapilamadi.") + detail;
       return;
     }
 
