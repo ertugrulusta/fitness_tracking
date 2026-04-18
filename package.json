@@ -1,6 +1,7 @@
 {
   "name": "trainlog-web",
   "version": "1.0.0",
+  "main": "index.js",
   "private": true,
   "scripts": {
     "start": "node local-server.js"
