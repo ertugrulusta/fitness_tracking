@@ -1,4 +1,16 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "cleanUrls": true
+  "functions": {
+    "index.js": {
+      "includeFiles": [
+        "index.html",
+        "login.html",
+        "styles.css",
+        "app.client.js",
+        "login.client.js",
+        "api/**/*.js",
+        "lib/**/*.js"
+      ]
+    }
+  }
 }
