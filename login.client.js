@@ -37,10 +37,19 @@ async function submitAuthForm(event) {
       })
     });
 
-    const payload = await response.json();
+    let payload = {};
+    let rawBody = "";
+
+    try {
+      rawBody = await response.text();
+      payload = rawBody ? JSON.parse(rawBody) : {};
+    } catch {
+      payload = {};
+    }
+
     if (!response.ok) {
-      const detail = payload.detail ? ` (${payload.detail})` : "";
-      authMessage.textContent = (payload.error || "Giris yapilamadi.") + detail;
+      const detail = payload.detail || payload.error || rawBody || `HTTP ${response.status}`;
+      authMessage.textContent = `${authMode === "login" ? "Giris yapilamadi." : "Kayit olusturulamadi."} (${detail})`;
       return;
     }
 
