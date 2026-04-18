@@ -1,34 +1,4 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "*.client.js",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "*.css",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/login",
-      "dest": "/login.html"
-    },
-    {
-      "src": "/",
-      "dest": "/index.html"
-    }
-  ]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true
 }
