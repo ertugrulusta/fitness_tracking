@@ -11,17 +11,13 @@ const staticFiles = new Map([
   ["/login.html", "login.html"],
   ["/styles.css", "styles.css"],
   ["/app.client.js", "app.client.js"],
-  ["/login.client.js", "login.client.js"]
+  ["/login.client.js", "login.client.js"],
+  ["/supabase.client.js", "supabase.client.js"],
+  ["/supabase-schema.sql", "supabase-schema.sql"]
 ]);
 
 const apiHandlers = new Map([
-  ["/api/auth/login", require("./api/auth/login")],
-  ["/api/auth/signup", require("./api/auth/signup")],
-  ["/api/auth/logout", require("./api/auth/logout")],
-  ["/api/auth/me", require("./api/auth/me")],
-  ["/api/bootstrap", require("./api/bootstrap")],
-  ["/api/collections", require("./api/collections")],
-  ["/api/migrate-localstorage", require("./api/migrate-localstorage")]
+  ["/api/config", require("./api/config")]
 ]);
 
 const mimeTypes = {

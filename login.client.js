@@ -1,3 +1,5 @@
+import { getSupabase } from "./supabase.client.js";
+
 const authForm = document.getElementById("authForm");
 const authSubtitle = document.getElementById("authSubtitle");
 const authEmailInput = document.getElementById("authEmail");
@@ -7,6 +9,7 @@ const authToggleButton = document.getElementById("authToggleButton");
 const authMessage = document.getElementById("authMessage");
 
 let authMode = "login";
+const supabase = await getSupabase();
 
 function renderAuthMode() {
   const isLogin = authMode === "login";
@@ -25,31 +28,19 @@ async function submitAuthForm(event) {
   authSubmitButton.disabled = true;
 
   try {
-    const endpoint = authMode === "login" ? "/api/auth/login" : "/api/auth/signup";
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email: authEmailInput.value.trim(),
-        password: authPasswordInput.value
-      })
-    });
+    const email = authEmailInput.value.trim();
+    const password = authPasswordInput.value;
+    const result = authMode === "login"
+      ? await supabase.auth.signInWithPassword({ email, password })
+      : await supabase.auth.signUp({ email, password });
 
-    let payload = {};
-    let rawBody = "";
-
-    try {
-      rawBody = await response.text();
-      payload = rawBody ? JSON.parse(rawBody) : {};
-    } catch {
-      payload = {};
+    if (result.error) {
+      authMessage.textContent = `${authMode === "login" ? "Giris yapilamadi." : "Kayit olusturulamadi."} (${result.error.message})`;
+      return;
     }
 
-    if (!response.ok) {
-      const detail = payload.detail || payload.error || rawBody || `HTTP ${response.status}`;
-      authMessage.textContent = `${authMode === "login" ? "Giris yapilamadi." : "Kayit olusturulamadi."} (${detail})`;
+    if (authMode === "signup" && !result.data.session) {
+      authMessage.textContent = "Kayit olusturuldu. Email dogrulama aciksa mailini kontrol et.";
       return;
     }
 
@@ -70,9 +61,9 @@ authToggleButton.addEventListener("click", () => {
 
 renderAuthMode();
 
-void fetch("/api/auth/me", { cache: "no-store" })
-  .then((response) => {
-    if (response.ok) {
+void supabase.auth.getSession()
+  .then(({ data }) => {
+    if (data.session) {
       window.location.replace("/");
     }
   })

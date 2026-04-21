@@ -1,3 +1,5 @@
+import { getSupabase } from "./supabase.client.js";
+
 const STORAGE_KEYS = {
   sessions: "trainlog-web-sessions",
   programs: "trainlog-web-programs",
@@ -265,6 +267,8 @@ const state = {
   programDraft: createProgramDraft()
 };
 
+const supabase = await getSupabase();
+
 const currentUserEmail = document.getElementById("currentUserEmail");
 const logoutButton = document.getElementById("logoutButton");
 
@@ -340,7 +344,7 @@ async function init() {
 
 function bindEvents() {
   logoutButton.addEventListener("click", async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await supabase.auth.signOut();
     window.location.replace("/login");
   });
 
@@ -1234,8 +1238,13 @@ async function seedInitialData(remoteCollections = null) {
 
 async function fetchBootstrapCollections() {
   try {
-    const response = await fetch("/api/bootstrap", { cache: "no-store" });
-    if (response.status === 401) {
+    const [{ data: sessionData }, { data: userData, error: userError }] = await Promise.all([
+      supabase.auth.getSession(),
+      supabase.auth.getUser()
+    ]);
+
+    const user = userData?.user || sessionData?.session?.user || null;
+    if (userError || !user) {
       return {
         authenticated: false,
         sessions: [],
@@ -1244,17 +1253,25 @@ async function fetchBootstrapCollections() {
       };
     }
 
-    if (!response.ok) {
-      throw new Error(`Bootstrap failed with ${response.status}`);
+    const { data, error } = await supabase
+      .from("user_collections")
+      .select("name,payload")
+      .eq("user_id", user.id);
+
+    if (error) {
+      throw error;
     }
 
-    const payload = await response.json();
+    const collectionMap = Object.fromEntries(
+      (data || []).map((row) => [row.name, Array.isArray(row.payload) ? row.payload : []])
+    );
+
     return {
       authenticated: true,
-      user: payload.user || null,
-      sessions: Array.isArray(payload.sessions) ? payload.sessions : [],
-      programs: Array.isArray(payload.programs) ? payload.programs : [],
-      exercises: Array.isArray(payload.exercises) ? payload.exercises : []
+      user,
+      sessions: collectionMap.sessions || [],
+      programs: collectionMap.programs || [],
+      exercises: collectionMap.exercises || []
     };
   } catch (error) {
     console.error("Bootstrap error", error);
@@ -1284,22 +1301,28 @@ async function persistCollection(key) {
   }
 
   try {
-    const response = await fetch(`/api/collections?name=${encodeURIComponent(collectionName)}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        items: collectionCache[key]
-      })
-    });
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData.user) {
+      throw userError || new Error("Kullanici bulunamadi.");
+    }
 
-    if (!response.ok) {
-      throw new Error(`Persist failed for ${collectionName} with ${response.status}`);
+    const { error } = await supabase
+      .from("user_collections")
+      .upsert({
+        user_id: userData.user.id,
+        name: collectionName,
+        payload: collectionCache[key],
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: "user_id,name"
+      });
+
+    if (error) {
+      throw error;
     }
   } catch (error) {
     console.error("Persist error", error);
-    window.alert("Veritabani kaydi sirasinda bir hata oldu. Sayfayi yenileyip tekrar dene.");
+    window.alert("Supabase kaydi sirasinda bir hata oldu. SQL semasini ve auth ayarlarini kontrol et.");
   }
 }
 
